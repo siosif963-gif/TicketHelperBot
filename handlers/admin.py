@@ -43,6 +43,7 @@ from keyboards.reply import (
     main_menu_kb,
 )
 from states.states import AdminAuth, AdminProcess
+from utils.rate_limit import AttemptLimiter
 from utils.formatters import (
     format_ticket_card,
     format_ticket_with_reply,
@@ -54,6 +55,12 @@ from utils.formatters import (
 logger = logging.getLogger(__name__)
 
 MAX_TEXT = 800
+
+pin_limiter = AttemptLimiter(max_attempts=5, lock_seconds=300)
+
+
+def _locked_text(seconds: int) -> str:
+    return f"⛔ Слишком много неверных попыток. Повторите через {seconds // 60 + 1} мин."
 
 auth_router = Router()
 router = Router()
@@ -71,6 +78,10 @@ async def admin_login(message: Message, state: FSMContext) -> None:
     if user is not None and user.role == ROLE_ADMIN:
         await message.answer("Вы уже администратор.", reply_markup=admin_menu_kb())
         return
+    locked = pin_limiter.seconds_left(message.from_user.id)
+    if locked:
+        await message.answer(_locked_text(locked), reply_markup=main_menu_kb())
+        return
     await state.set_state(AdminAuth.wait_admin_password)
     await message.answer("🔐 Введите PIN-код:", reply_markup=cancel_kb())
 
@@ -79,7 +90,13 @@ async def admin_login(message: Message, state: FSMContext) -> None:
 async def admin_check_password(message: Message, state: FSMContext) -> None:
     await safe_delete(message)
     user_id = message.from_user.id
+    locked = pin_limiter.seconds_left(user_id)
+    if locked:
+        await state.clear()
+        await message.answer(_locked_text(locked), reply_markup=main_menu_kb())
+        return
     if check_password(message.text.strip()):
+        pin_limiter.reset(user_id)
         # Пользователь мог быть не создан (нет /start) — гарантируем запись.
         await get_or_create_user(user_id, message.from_user.username)
         await set_user_role(user_id, ROLE_ADMIN)
@@ -90,6 +107,7 @@ async def admin_check_password(message: Message, state: FSMContext) -> None:
         )
     else:
         await state.clear()
+        pin_limiter.register_failure(user_id)
         logger.warning("Неверный PIN от пользователя %s", user_id)
         await message.answer("⛔ Доступ запрещён.", reply_markup=main_menu_kb())
 
