@@ -37,6 +37,7 @@ from keyboards.reply import (
     BTN_ADMIN_IN_PROGRESS,
     BTN_ADMIN_NEW,
     BTN_ADMIN_SETTINGS,
+    MENU_TEXTS,
     admin_menu_kb,
     cancel_kb,
     main_menu_kb,
@@ -219,7 +220,7 @@ async def ticket_reject(callback: CallbackQuery, callback_data: TicketCB, state:
     await callback.answer()
 
 
-@router.message(AdminProcess.wait_reject_reason, F.text)
+@router.message(AdminProcess.wait_reject_reason, F.text, ~F.text.in_(MENU_TEXTS))
 async def reject_reason(message: Message, state: FSMContext, bot: Bot) -> None:
     reason = message.text.strip()
     if not reason or len(reason) > MAX_TEXT:
@@ -246,7 +247,7 @@ async def reject_reason(message: Message, state: FSMContext, bot: Bot) -> None:
 
 @router.message(AdminProcess.wait_reject_reason)
 async def reject_reason_fallback(message: Message) -> None:
-    await message.answer("Отправьте причину текстом.")
+    await message.answer("Отправьте причину текстом или нажмите «❌ Отмена».")
 
 
 @router.callback_query(TicketCB.filter(F.action == "close"))
@@ -269,7 +270,7 @@ async def ticket_close(callback: CallbackQuery, callback_data: TicketCB, state: 
     await callback.answer()
 
 
-@router.message(AdminProcess.wait_admin_comment, F.text)
+@router.message(AdminProcess.wait_admin_comment, F.text, ~F.text.in_(MENU_TEXTS))
 async def close_comment(message: Message, state: FSMContext) -> None:
     comment = message.text.strip()
     if not comment or len(comment) > MAX_TEXT:
@@ -282,7 +283,7 @@ async def close_comment(message: Message, state: FSMContext) -> None:
 
 @router.message(AdminProcess.wait_admin_comment)
 async def close_comment_fallback(message: Message) -> None:
-    await message.answer("Отправьте комментарий текстом.")
+    await message.answer("Отправьте комментарий текстом или нажмите «❌ Отмена».")
 
 
 @router.message(AdminProcess.wait_admin_photo, F.photo)

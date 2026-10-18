@@ -10,6 +10,19 @@ BTN_ADMIN_NEW = "📥 Новые заявки"
 BTN_ADMIN_IN_PROGRESS = "🔄 В работе"
 BTN_ADMIN_CLOSED = "✅ Закрытые"
 BTN_ADMIN_SETTINGS = "⚙️ Настройки"
+BTN_ADMIN_LOGIN = "Режим админа"
+
+# Тексты кнопок меню: не должны приниматься как свободный ввод в FSM-состояниях.
+MENU_TEXTS = {
+    BTN_NEW_TICKET,
+    BTN_MY_TICKETS,
+    BTN_HELP,
+    BTN_ADMIN_NEW,
+    BTN_ADMIN_IN_PROGRESS,
+    BTN_ADMIN_CLOSED,
+    BTN_ADMIN_SETTINGS,
+    BTN_ADMIN_LOGIN,
+}
 
 
 def main_menu_kb() -> ReplyKeyboardMarkup:
