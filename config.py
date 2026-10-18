@@ -31,7 +31,7 @@ DB_URL: str = os.getenv("DB_URL", "sqlite+aiosqlite:///bot.db")
 # Администраторы по Telegram ID: получают доступ без PIN.
 ADMIN_IDS: frozenset[int] = parse_admin_ids(os.getenv("ADMIN_IDS"))
 # Демо-режим: разрешает вход в админку по PIN (удобно показывать проект).
-DEMO_MODE: bool = parse_bool(os.getenv("DEMO_MODE"), default=True)
+DEMO_MODE: bool = parse_bool(os.getenv("DEMO_MODE"), default=False)
 
 if not BOT_TOKEN:
     raise RuntimeError("Заполните BOT_TOKEN в .env")

@@ -71,7 +71,7 @@ bot/
    ```bash
    cp .env.example .env
    ```
-   Демо-PIN администратора: `1234`. Чтобы задать свой, запустите `python hash_password.py` и вставьте полученный хэш в `.env`.
+   Админы задаются в `ADMIN_IDS` (ваш Telegram ID можно узнать у @userinfobot). **Для демо поставьте `DEMO_MODE=true`**: тогда в админку можно войти по PIN `1234`. Чтобы задать свой, запустите `python hash_password.py` и вставьте полученный хэш в `.env`.
 3. Запустите бота:
    ```bash
    python main.py
@@ -84,14 +84,14 @@ bot/
 |---|---|
 | `BOT_TOKEN` | токен от @BotFather (обязательно) |
 | `ADMIN_IDS` | Telegram ID администраторов через запятую, доступ без PIN |
-| `DEMO_MODE` | `true` — вход в админку по PIN (по умолчанию); `false` — только `ADMIN_IDS` |
+| `DEMO_MODE` | `true` — вход в админку по PIN; `false` (по умолчанию) — только `ADMIN_IDS` |
 | `ADMIN_PASSWORD_HASH` | SHA-256 хэш PIN (нужен при `DEMO_MODE=true`), получить: `python hash_password.py` |
 | `DB_URL` | строка подключения, по умолчанию `sqlite+aiosqlite:///bot.db` |
 
 ## 🐳 Развёртывание в Docker
 
 ```bash
-cp .env.example .env   # заполните BOT_TOKEN, ADMIN_IDS, поставьте DEMO_MODE=false
+cp .env.example .env   # заполните BOT_TOKEN и ADMIN_IDS
 docker compose up -d --build
 ```
 
