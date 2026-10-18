@@ -3,3 +3,4 @@ bot.db
 bot.log
 __pycache__/
 venv/
+.pytest_cache/
