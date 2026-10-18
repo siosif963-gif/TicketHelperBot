@@ -7,8 +7,9 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, ErrorEvent, Message, ReplyKeyboardMarkup
 
+from config import ADMIN_IDS
 from database.models import ROLE_ADMIN
-from database.requests import get_or_create_user, get_user
+from database.requests import get_or_create_user, get_user, set_user_role
 from keyboards.inline import CB_CANCEL_FORM
 from keyboards.reply import BTN_CANCEL, BTN_HELP, admin_menu_kb, main_menu_kb
 from utils.formatters import safe_delete
@@ -42,11 +43,13 @@ async def _menu_for(user_id: int) -> ReplyKeyboardMarkup:
 async def cmd_start(message: Message, state: FSMContext) -> None:
     await state.clear()
     await get_or_create_user(message.from_user.id, message.from_user.username)
+    if message.from_user.id in ADMIN_IDS:
+        await set_user_role(message.from_user.id, ROLE_ADMIN)
     name = html.escape(message.from_user.full_name)
     await message.answer(
         f"👋 Здравствуйте, {name}! Это бот приёма заявок и жалоб. "
         "Выберите действие в меню ниже.",
-        reply_markup=main_menu_kb(),
+        reply_markup=await _menu_for(message.from_user.id),
     )
 
 

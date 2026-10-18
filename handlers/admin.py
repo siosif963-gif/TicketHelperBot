@@ -7,7 +7,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from config import check_password
+from config import ADMIN_IDS, DEMO_MODE, check_password
 from database.models import ROLE_ADMIN, ROLE_CLIENT, STATUS_IN_PROGRESS, STATUS_NEW
 from database.requests import (
     close_ticket,
@@ -77,6 +77,15 @@ async def admin_login(message: Message, state: FSMContext) -> None:
     user = await get_user(message.from_user.id)
     if user is not None and user.role == ROLE_ADMIN:
         await message.answer("Вы уже администратор.", reply_markup=admin_menu_kb())
+        return
+    if message.from_user.id in ADMIN_IDS:
+        await get_or_create_user(message.from_user.id, message.from_user.username)
+        await set_user_role(message.from_user.id, ROLE_ADMIN)
+        logger.info("Пользователь %s получил роль admin по ADMIN_IDS", message.from_user.id)
+        await message.answer("✅ Вы администратор.", reply_markup=admin_menu_kb())
+        return
+    if not DEMO_MODE:
+        await message.answer("⛔ Вход по PIN отключён.", reply_markup=main_menu_kb())
         return
     locked = pin_limiter.seconds_left(message.from_user.id)
     if locked:
